@@ -7,6 +7,23 @@ class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = "__all__"
+        read_only_fields = ("owner",)
+
+    def validate_course(self, course):
+        request = self.context.get("request")
+
+        if request and request.user.is_authenticated:
+            is_course_owner = course.owner_id == request.user.pk
+            is_course_moderator = request.user.groups.filter(
+                name="Модераторы"
+            ).exists()
+
+            if not is_course_owner and not is_course_moderator:
+                raise serializers.ValidationError(
+                    "Можно добавлять уроки только в свой курс."
+                )
+
+        return course
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -16,6 +33,7 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = "__all__"
+        read_only_fields = ("owner",)
 
     def get_lessons_count(self, obj):
         return obj.lessons.count()

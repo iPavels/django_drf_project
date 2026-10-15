@@ -1,21 +1,43 @@
 from rest_framework import generics, viewsets
-
 from materials.models import Course, Lesson
+from materials.permissions import IsOwnerOrModerator, is_moderator
 from materials.serializers import CourseSerializer, LessonSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    """CRUD для курсов."""
+    """CRUD для курсов с проверкой владельца и модератора."""
 
-    queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    permission_classes = [IsOwnerOrModerator]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if is_moderator(user):
+            return Course.objects.all()
+
+        return Course.objects.filter(owner=user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class LessonListCreateAPIView(generics.ListCreateAPIView):
-    """Получение списка уроков и создание урока."""
+    """Список уроков и создание урока."""
 
-    queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [IsOwnerOrModerator]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if is_moderator(user):
+            return Lesson.objects.all()
+
+        return Lesson.objects.filter(owner=user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class LessonRetrieveUpdateDestroyAPIView(
@@ -23,5 +45,14 @@ class LessonRetrieveUpdateDestroyAPIView(
 ):
     """Просмотр, изменение и удаление отдельного урока."""
 
-    queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [IsOwnerOrModerator]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if is_moderator(user):
+            return Lesson.objects.all()
+
+        return Lesson.objects.filter(owner=user)
+
