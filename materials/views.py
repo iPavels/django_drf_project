@@ -8,6 +8,7 @@ from materials.paginators import CoursePagination
 from materials.permissions import IsOwnerOrModerator, is_moderator
 from materials.serializers import CourseSerializer, LessonSerializer
 
+
 class CourseViewSet(viewsets.ModelViewSet):
     """CRUD для курсов с проверкой владельца и модератора."""
 
@@ -19,9 +20,9 @@ class CourseViewSet(viewsets.ModelViewSet):
         user = self.request.user
 
         if is_moderator(user):
-            return Course.objects.all()
+            return Course.objects.all().order_by("id")
 
-        return Course.objects.filter(owner=user)
+        return Course.objects.filter(owner=user).order_by("id")
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -38,9 +39,9 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
         user = self.request.user
 
         if is_moderator(user):
-            return Lesson.objects.all()
+            return Lesson.objects.all().order_by("id")
 
-        return Lesson.objects.filter(owner=user)
+        return Lesson.objects.filter(owner=user).order_by("id")
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -58,9 +59,9 @@ class LessonRetrieveUpdateDestroyAPIView(
         user = self.request.user
 
         if is_moderator(user):
-            return Lesson.objects.all()
+            return Lesson.objects.all().order_by("id")
 
-        return Lesson.objects.filter(owner=user)
+        return Lesson.objects.filter(owner=user).order_by("id")
 
 
 class SubscriptionAPIView(APIView):
@@ -86,4 +87,3 @@ class SubscriptionAPIView(APIView):
             {"message": message},
             status=status.HTTP_200_OK,
         )
-
