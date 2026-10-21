@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'users',
     'materials',
     "django_filters",
+    "drf_spectacular",
 
 
 ]
@@ -139,4 +140,12 @@ REST_FRAMEWORK = {
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Django DRF Project API",
+    "DESCRIPTION": "Документация API учебного проекта",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
