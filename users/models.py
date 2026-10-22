@@ -53,6 +53,14 @@ class Payment(models.Model):
     PAYMENT_METHODS = [
         ("cash", "Наличные"),
         ("transfer", "Перевод на счет"),
+        ("stripe", "Stripe"),
+    ]
+
+    PAYMENT_STATUSES = [
+        ("pending", "Ожидает оплаты"),
+        ("paid", "Оплачен"),
+        ("failed", "Ошибка оплаты"),
+        ("expired", "Ссылка истекла"),
     ]
 
     user = models.ForeignKey(

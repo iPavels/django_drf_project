@@ -60,6 +60,7 @@ class UserDeleteAPIView(generics.DestroyAPIView):
     """Удаление аккаунта только самим авторизованным пользователем."""
 
     permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
 
     def get_object(self):
         return self.request.user
