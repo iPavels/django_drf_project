@@ -8,9 +8,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wdb!ob*a0f@rs-*q178)skfshso88g4ypw#krsh6z&-9z&*s=b'
-
 SECRET_KEY = os.getenv("SECRET_KEY")
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'users',
     'materials',
     "django_filters",
+    "drf_spectacular",
 
 
 ]
@@ -139,4 +140,12 @@ REST_FRAMEWORK = {
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Django DRF Project API",
+    "DESCRIPTION": "Документация API учебного проекта",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }

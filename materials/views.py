@@ -6,7 +6,12 @@ from rest_framework.views import APIView
 from materials.models import Course, Lesson, Subscription
 from materials.paginators import CoursePagination
 from materials.permissions import IsOwnerOrModerator, is_moderator
-from materials.serializers import CourseSerializer, LessonSerializer
+from materials.serializers import (
+    CourseSerializer,
+    LessonSerializer,
+    SubscriptionResponseSerializer,
+)
+from drf_spectacular.utils import extend_schema
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -17,6 +22,9 @@ class CourseViewSet(viewsets.ModelViewSet):
     pagination_class = CoursePagination
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Course.objects.none()
+
         user = self.request.user
 
         if is_moderator(user):
@@ -36,6 +44,9 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
     pagination_class = CoursePagination
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Lesson.objects.none()
+
         user = self.request.user
 
         if is_moderator(user):
@@ -56,6 +67,9 @@ class LessonRetrieveUpdateDestroyAPIView(
     permission_classes = [IsOwnerOrModerator]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Lesson.objects.none()
+
         user = self.request.user
 
         if is_moderator(user):
@@ -67,8 +81,12 @@ class LessonRetrieveUpdateDestroyAPIView(
 class SubscriptionAPIView(APIView):
     """Создание и отмена подписки на курс."""
 
+    serializer_class = SubscriptionResponseSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        responses={200: SubscriptionResponseSerializer},
+    )
     def post(self, request, course_id):
         course = get_object_or_404(Course, pk=course_id)
 

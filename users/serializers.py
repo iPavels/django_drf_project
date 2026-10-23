@@ -45,3 +45,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+class PaymentCreateSerializer(serializers.Serializer):
+    course_id = serializers.IntegerField(min_value=1)
