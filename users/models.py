@@ -99,6 +99,32 @@ class Payment(models.Model):
         choices=PAYMENT_METHODS,
         verbose_name="Способ оплаты",
     )
+    status = models.CharField(
+        max_length=10,
+        choices=PAYMENT_STATUSES,
+        default="pending",
+        verbose_name="Статус платежа",
+    )
+    stripe_product_id = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="ID продукта Stripe",
+    )
+    stripe_price_id = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="ID цены Stripe",
+    )
+    stripe_session_id = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="ID сессии Stripe",
+    )
+    payment_url = models.URLField(
+        max_length=500,
+        blank=True,
+        verbose_name="Ссылка на оплату",
+    )
 
     def __str__(self):
         return f"{self.user.email} — {self.amount}"

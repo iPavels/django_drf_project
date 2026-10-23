@@ -10,6 +10,7 @@ from drf_spectacular.views import (
 )
 
 from users.views import (
+    PaymentCreateAPIView,
     PaymentListAPIView,
     UserDeleteAPIView,
     UserRegistrationAPIView,
@@ -30,6 +31,11 @@ urlpatterns = [
 
     # Курсы и уроки
     path("api/", include("materials.urls")),
+    path(
+        "api/payments/create/",
+        PaymentCreateAPIView.as_view(),
+        name="payment-create",
+),
 
     # Платежи
     path("api/payments/", PaymentListAPIView.as_view(), name="payment-list"),
