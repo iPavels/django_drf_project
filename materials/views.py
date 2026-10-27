@@ -1,3 +1,4 @@
+from materials.tasks import send_course_update_notification
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -55,7 +56,11 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
         return Lesson.objects.filter(owner=user).order_by("id")
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        lesson = serializer.save(owner=self.request.user)
+        send_course_update_notification.delay(
+            lesson.course_id,
+            lesson.title,
+        )
 
 
 class LessonRetrieveUpdateDestroyAPIView(
@@ -76,6 +81,13 @@ class LessonRetrieveUpdateDestroyAPIView(
             return Lesson.objects.all().order_by("id")
 
         return Lesson.objects.filter(owner=user).order_by("id")
+
+    def perform_update(self, serializer):
+        lesson = serializer.save()
+        send_course_update_notification.delay(
+            lesson.course_id,
+            lesson.title,
+        )
 
 
 class SubscriptionAPIView(APIView):

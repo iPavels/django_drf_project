@@ -1,3 +1,7 @@
+from unittest.mock import patch
+
+from django.core.cache import cache
+from materials.tasks import send_course_update_notification
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.urls import reverse
@@ -251,3 +255,55 @@ class MaterialsAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("results", response.data)
         self.assertIn("count", response.data)
+
+
+
+    def test_course_notification_is_sent_once_within_four_hours(self):
+        Subscription.objects.create(
+            user=self.other_user,
+            course=self.course,
+        )
+
+        cache.clear()
+
+        with patch("materials.tasks.send_mail") as mocked_send_mail:
+            first_result = send_course_update_notification(
+                self.course.pk,
+                self.lesson.title,
+            )
+            second_result = send_course_update_notification(
+                self.course.pk,
+                self.lesson.title,
+            )
+
+        self.assertEqual(first_result, "Отправлено уведомлений: 1")
+        self.assertEqual(
+            second_result,
+            "Уведомление уже отправлялось за последние 4 часа.",
+        )
+        self.assertEqual(mocked_send_mail.call_count, 1)
+
+    def test_course_notification_can_be_sent_after_four_hours(self):
+        Subscription.objects.create(
+            user=self.other_user,
+            course=self.course,
+        )
+
+        cache.clear()
+
+        with patch("materials.tasks.send_mail") as mocked_send_mail:
+            send_course_update_notification(
+                self.course.pk,
+                self.lesson.title,
+            )
+
+            cache.delete(f"course_update_notification:{self.course.pk}")
+
+            result = send_course_update_notification(
+                self.course.pk,
+                self.lesson.title,
+            )
+
+        self.assertEqual(result, "Отправлено уведомлений: 1")
+        self.assertEqual(mocked_send_mail.call_count, 2)
+
