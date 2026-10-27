@@ -104,11 +104,34 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
+TIME_ZONE = "Europe/Prague"
 USE_TZ = True
+
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "django_drf_project",
+    },
+}
+
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+
+CELERY_BEAT_SCHEDULE = {
+    "deactivate-inactive-users-monthly-check": {
+        "task": "users.tasks.deactivate_inactive_users",
+        "schedule": 60 * 60 * 24,
+    },
+}
 
 
 # Static files (CSS, JavaScript, Images)
